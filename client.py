@@ -12,7 +12,7 @@ def send_image():
 	file = open('static/trump-test.jpg', 'rb')
 	# encrypt picture
 	filename = ("%020x" % random.randrange(16**30))[:16]
-	encrypt_image("kkk", filename, file.read())
+	encrypt_image("laser32097n34209f", filename, file.read())
 	# open encrypted picture
 	file = open(filename, 'rb')
 	image = {'image': file}

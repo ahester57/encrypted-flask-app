@@ -9,6 +9,7 @@ UPLOAD_FOLDER = os.path.basename('static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # You'll need to register for sightengine
+client = SightengineClient('403295348', 'ZSNBkHaoswcSjrbjz7hK')
 #client = SightengineClient('<id>', '<secret>')
 
 if (__name__ == "__main__"):
@@ -40,72 +41,86 @@ def hello_world():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-	file = request.files['image']
-	f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
-	if len(request.form) > 0:
-		token = request.form['token']
-		if token != "RDRDRD":
-			reason = "Wrong Token"
-			return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
-	else:
-		reason = "Missing Token"
-		return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
+	try:
+		file = request.files['image']
+		f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 		
+		invalid = True
+		reason = "Not Donald J. Trump"
+		dec_f = ("%s_dec.jpg" % f)
+	except:
+		reason = "Missing Image"
+		return render_template('index.html', invalidImage=True, reason=reason, init=True, filename="")
 
-	#jtoken = request.files['token']
-	#print(token)
+
+	try:
+		if len(request.form) > 0:
+			token = request.form['token']
+			if token != "RDRDRD":
+				reason = "Wrong Token"
+				return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
+		else:
+			reason = "Missing Token"
+			return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
+	except:
+		reason = "Missing Form Data"
+		return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
 
 	# validate image
-	print(file.filename)
-	file.save(f)
-	dec_f = ("%s_dec.jpg" % f)
+	try:
+		print(file.filename)
+		dec_f = ("%s_dec.jpg" % f)
 
-	with open(dec_f, 'wb') as dec:
-		dec.write(decrypt_image("kkk", f))
+		file.save(f)
+		with open(dec_f, 'wb') as dec:
+			dec.write(decrypt_image("laser32097n34209f", f))
 
-	os.remove(f)
 
-	invalid = True
-	reason = "Not Donald J. Trump"
+		output = client.check('nudity', 'wad', 'celebrities', 'face-attributes').set_file(dec_f)
+		print(output)
 
-	output = client.check('nudity', 'wad', 'celebrities', 'face-attributes').set_file(dec_f)
-
-	print(output)
-
-	if output['status'] == "failure":
-		os.remove(dec_f)
-		reason = output['error']['message']
-		print(reason)
-		return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
-	
-	if len(output['faces']) < 1:
-		os.remove(dec_f)
-		reason = "Not Donald J. Trump"
-		print(reason)
-		return render_template('index.html', invalidImage=True, reason=reason, init=True, filename=f)
+		if output['status'] == "failure":
+			os.remove(dec_f)
+			reason = output['error']['message']
+			print(reason)
+			return render_template('index.html', invalidImage=invalid, reason=reason, init=True, filename=f)
 		
-	if output['nudity']['safe'] <= output['nudity']['partial'] and output['nudity']['safe'] <= output['nudity']['raw']:
-		reason = "Contains Nudity"
-		print(reason)
-		invalid = True
-
-	if output['weapon'] > 0.2 or output['alcohol'] > 0.2 or output['drugs'] > 0.2:
-		reason = "Contains Weapons, Alcohol, or Drugs"
-		print(reason)
-		invalid = True
-
-	# is it trump
-	invalid, reason = is_it_trump(output['faces'])
-
-	if 'faces' in output:
-		if output['faces'][0]['attributes']['minor'] > 0.85:
-			reason = "Contains a child"
+		if len(output['faces']) < 1:
+			os.remove(dec_f)
+			reason = "Not Donald J. Trump"
 			print(reason)
 			invalid = True
-	 	
-	if invalid:
-		os.remove(dec_f)
+			return render_template('index.html', invalidImage=invalid, reason=reason, init=True, filename=f)
+			
+		if output['nudity']['safe'] <= output['nudity']['partial'] and output['nudity']['safe'] <= output['nudity']['raw']:
+			os.remove(dec_f)
+			reason = "Contains Nudity"
+			print(reason)
+			invalid = True
+			return render_template('index.html', invalidImage=invalid, reason=reason, init=True, filename=f)
+
+		if output['weapon'] > 0.33 or output['alcohol'] > 0.33 or output['drugs'] > 0.33:
+			os.remove(dec_f)
+			reason = "Contains Weapons, Alcohol, or Drugs"
+			print(reason)
+			invalid = True
+			return render_template('index.html', invalidImage=invalid, reason=reason, init=True, filename=f)
+
+		# is it trump
+		invalid, reason = is_it_trump(output['faces'])
+
+		if 'faces' in output:
+			if output['faces'][0]['attributes']['minor'] > 0.85:
+				reason = "Contains a child"
+				print(reason)
+				invalid = True
+	finally:
+		try:
+			os.remove(f)
+			if invalid:
+				os.remove(dec_f)
+		except:
+			pass
 
 	return render_template('index.html', invalidImage=invalid, reason=reason, init=True, filename=dec_f)
 
