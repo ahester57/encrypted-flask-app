@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Flask Image Upload</title>
+	 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+<header class="navbar">
+	<span class="navbar"></span>
+</header>
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+	<span class="btn btn-default btn-file">
+	Browse <input type="file" name="image">
+	</span>
+	<input type="hidden" name="token" value="RDRDRD">
+	<input type="submit" value="Upload image" class="btn btn-primary">
+</form>
+
+<div class="text-center">
+	{% if init %}
+		{% if invalidImage %}
+			<div class="alert alert-danger" style="margin-top:18px;">
+				<strong>Error</strong> Your image was bad!
+				<i>{{reason}}</i>
+			</div>
+		{% else %}
+			<div class="alert alert-success" style="margin-top:18px;">
+				<strong>Success!</strong> That is Donald J. Trump!
+			</div>
+			<span>
+			<img src="{{filename}}" alt="Your picture" >
+			</span>
+		{% endif %}
+	{% endif %}
+</div>
+</body>
+</html>
