@@ -30,13 +30,3 @@ def encrypt_image(key, filename, data):
 
 
 send_image()
-#encrypt_image("kkk", "output", file.read())
-
-
-
-#request = Request(url, urlencode(post_fields).encode())
-
-#json = urlopen(request).read().decode()
-#print(json)
-
-
