@@ -9,7 +9,6 @@ UPLOAD_FOLDER = os.path.basename('static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # You'll need to register for sightengine
-client = SightengineClient('403295348', 'ZSNBkHaoswcSjrbjz7hK')
 #client = SightengineClient('<id>', '<secret>')
 
 if (__name__ == "__main__"):
